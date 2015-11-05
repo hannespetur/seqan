@@ -1,9 +1,12 @@
-.. image:: https://readthedocs.org/projects/seqan/badge/?version=develop
-   :target: https://seqan.readthedocs.org/en/develop?badge=develop
-   :alt: Documentation Status
-
-SeqAn - The Library for Sequence Analysis
+SeqAn - The Library for Sequence Analysis (now with HTS!)
 =========================================
+
+This is a fork of SeqAn, with added extensibility of the htslib. List of new features:
+ * BCF file support (partially ready).
+ * Tabix support, which is an index format for BCF files (partially ready).
+ * CRAM support (not ready).
+
+To make use of these features you need to add `-DSEQAN_USE_HTSLIB=1` to your CXX compiler flags.
 
 What Is SeqAn?
 --------------
