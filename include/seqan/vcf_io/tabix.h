@@ -9,6 +9,8 @@
 #include <cstring>
 #include <vector>
 
+#include <seqan/vcf_io/vcf_record.h>
+
 namespace seqan {
 
 class Tabix
@@ -18,24 +20,11 @@ class Tabix
   tbx_t* tbx;
   hts_itr_t* hts_iter;
   const tbx_conf_t *idxconf;
-  int tid = -1;
-  int begin = -1;
-  int end = -1;
-  bool has_jumped = false;
   String<String<char> > chroms;
-  int rID = 0;
-  // Iterator<String<String<char> > >::Type current_chrom;
-  // std::vector<std::string>::iterator current_chrom;
-  // std::string filename;
+  unsigned rID = 0;
   
 
   // Tabix(void) { }
-
-  // ~Tabix(void)
-  // {
-  //   tbx_itr_destroy(hts_iter);
-  //   tbx_destroy(tbx);
-  // }
 };
 
 inline void
@@ -43,12 +32,8 @@ clear(Tabix index)
 {
     // tbx_itr_destroy(index.hts_iter);
     // tbx_destroy(index.tbx);
-    index.tid = -1;
-    index.begin = -1;
-    index.end = -1;
-    index.has_jumped = false;
     clear(index.chroms);
-    // clear(index.current_chrom);
+    index.rID = 0;
 }
 
 inline void
@@ -82,22 +67,21 @@ getHeader(String<char> & header, Tabix & index)
 }
 
 inline bool
-setRegion(Tabix & index, const char * region)
-{
-  tbx_itr_destroy(index.hts_iter);
-  index.hts_iter = tbx_itr_querys(index.tbx, region);
-  index.has_jumped = true;
-  return true;
-}
-
-inline bool
-atEnd(Tabix & index)
+_onLastRId(Tabix & index)
 {
   return index.rID == length(index.chroms) - 1;
 }
 
+inline void
+_nextRId(Tabix & index)
+{
+  ++index.rID;
+  tbx_itr_destroy(index.hts_iter);
+  index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[index.rID]));
+}
+
 inline bool
-getNextLine(String<char> & line, Tabix & index)
+_extractLineOfThisRId(String<char> & line, Tabix & index)
 {
   kstring_t str = {0,0,0};
 
@@ -106,27 +90,123 @@ getNextLine(String<char> & line, Tabix & index)
     line = str.s;
     return true;
   }
-  else if (!atEnd(index))
-  {
-    // The current rID is finished, move to the next one
-    ++index.rID;
-    tbx_itr_destroy(index.hts_iter);
-    index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[index.rID]));
 
-    if (index.hts_iter && tbx_itr_next(index.fn, index.tbx, index.hts_iter, &str) >= 0)
+  return false;
+}
+
+inline void
+_insertDataToVcfRecord(VcfRecord & record, String<char> const & line, unsigned const & rID)
+{
+    seqan::StringSet< seqan::String<char> > splitted_line;
+    seqan::strSplit(splitted_line, line, seqan::EqualsChar<'\t'>());
+    record.rID = rID;
+    lexicalCast(record.beginPos, splitted_line[1]);
+    --record.beginPos; // Change from 1-based to 0-based indexing
+    record.id = splitted_line[2];
+    record.ref = splitted_line[3];
+    record.alt = splitted_line[4];
+    lexicalCast(record.qual, splitted_line[5]);
+    record.filter = splitted_line[6];
+    record.info = splitted_line[7];
+
+    if (length(splitted_line) > 8)
     {
-      line = str.s;
+        record.format = splitted_line[8];
+    }
+}
+
+/**
+ * @brief Reads a VCF record to a single string.
+ * @details [long description]
+ * 
+ * @param[in,out] line [description]
+ * @param[in] index [description]
+ */
+inline bool
+readRawRecord(String<char> & line, Tabix & index)
+{
+  while (!_onLastRId(index))
+  {
+    if(_extractLineOfThisRId(line, index))
+    {
       return true;
     }
+
+    _nextRId(index);
+  }
+
+  // We are on the last rID.
+  if(_extractLineOfThisRId(line, index))
+  {
+    return true;
   }
 
   return false;
 }
 
-inline bool open(Tabix & index, char const * vcfFilename)
+/**
+ * @brief Read a VCF record from a tabix file.
+ * @details The tabix file needs to have previously been opened. If no record can be read false is returned,
+ * this can happen either because we've reached the end of the specified region or end of the BCF file.
+ * 
+ * @param record A VCF record.
+ * @param index Tabix index.
+ * 
+ * @return True means a new record was read, false is returned otherwise.
+ */
+inline bool
+readRecord(VcfRecord & record, Tabix & index)
+{
+    seqan::String<char> line;
+    if (!seqan::readRawRecord(line, index))
+        return false;
+
+    _insertDataToVcfRecord(record, line, index.rID);
+    return true;
+}
+
+/**
+ * @brief Changes the region of the index.
+ * @details The 
+ * 
+ * @param[in,out] index Tabix index.
+ * @param[in] region The region to change to. It should be on the format chrX or chrX:Y-Z.
+ */
+inline bool
+setRegion(Tabix & index, const char * region)
+{
+    tbx_itr_destroy(index.hts_iter);
+    index.hts_iter = tbx_itr_querys(index.tbx, region);
+    return true;
+}
+
+/**
+ * @brief Reads a region of a VCF file.
+ * @details Note: The records variable is not clear before adding VCF records, to allow extractions of multiple regions. 
+ * 
+ * @param[in,out] records A list of VCF records.
+ * @param index [description]
+ * @param region [description]
+ */
+inline void
+readRegion(seqan::String<VcfRecord> & records, Tabix & index, const char * region)
+{
+    setRegion(index, region);
+    seqan::String<char> line;
+
+    while(_extractLineOfThisRId(line, index))
+    {
+        VcfRecord record;
+        _insertDataToVcfRecord(record, line, index.rID);
+        append(records, record);
+    }
+}
+
+
+inline bool
+open(Tabix & index, char const * vcfFilename)
 {
   clear(index);
-  index.has_jumped = false;
   struct stat stat_tbi,stat_vcf;
   char *fnidx = (char*) calloc(strlen(vcfFilename) + 5, 1);
   strcat(strcpy(fnidx, vcfFilename), ".tbi");

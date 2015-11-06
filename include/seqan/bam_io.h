@@ -93,4 +93,9 @@
 #include <seqan/bam_io/bam_index_bai.h>
 #endif  // #if SEQAN_HAS_ZLIB
 
+#if SEQAN_USE_HTSLIB
+#include <seqan/bam_io/cram_alignment_record.h>
+#include <seqan/bam_io/cram_file.h>
+#endif  // #if SEQAN_USE_HTSLIB
+
 #endif  // INCLUDE_SEQAN_BAM_IO_H_
