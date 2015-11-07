@@ -1,9 +1,9 @@
-#ifndef SEQAN_BAM_IO_CRAM_ALIGNMENT_RECORD_H_
-#define SEQAN_BAM_IO_CRAM_ALIGNMENT_RECORD_H_
+#ifndef SEQAN_HTS_IO_HTS_ALIGNMENT_RECORD_H_
+#define SEQAN_HTS_IO_HTS_ALIGNMENT_RECORD_H_
 
 namespace seqan {
 
-class CramSequenceRecord
+class HtsSequenceRecord
 {
   public:
     String<char> qName;
@@ -11,7 +11,7 @@ class CramSequenceRecord
 };
 
 
-class CramAlignmentRecord
+class HtsAlignmentRecord
 {
   public:
     __uint32 _qID;
@@ -19,8 +19,8 @@ class CramAlignmentRecord
     String<char> qName;
     String<Iupac> seq;
     String<char> qual;
-    CharString tags;
-    CharString _buffer;
+    String<char> tags;
+    String<char> _buffer;
 
     static __int32 const INVALID_POS = -1;
     static __int32 const INVALID_REF_ID = -1;
@@ -32,4 +32,4 @@ class CramAlignmentRecord
 
 } // namespace seqan
 
-#endif // SEQAN_BAM_IO_CRAM_ALIGNMENT_RECORD_H_
+#endif // SEQAN_HTS_IO_HTS_ALIGNMENT_RECORD_H_
