@@ -16,9 +16,9 @@ namespace seqan {
 class Tabix
 {
  public:
-  htsFile* fn;
-  tbx_t* tbx;
-  hts_itr_t* hts_iter;
+  htsFile* fp = nullptr;
+  tbx_t* tbx = nullptr;
+  hts_itr_t* hts_iter = nullptr;
   const tbx_conf_t *idxconf;
   String<String<char> > chroms;
   unsigned rID = 0;
@@ -42,7 +42,7 @@ getHeader(String<char> & header, Tabix & index)
   // clear(header);
   kstring_t str = {0,0,0};
 
-  while ( hts_getline(index.fn, KS_SEP_LINE, &str) >= 0 )
+  while ( hts_getline(index.fp, KS_SEP_LINE, &str) >= 0 )
   {
     if ( !str.l || str.s[0] != index.tbx->conf.meta_char )
     {
@@ -85,7 +85,7 @@ _extractLineOfThisRId(String<char> & line, Tabix & index)
 {
   kstring_t str = {0,0,0};
 
-  if (index.hts_iter && tbx_itr_next(index.fn, index.tbx, index.hts_iter, &str) >= 0)
+  if (index.hts_iter && tbx_itr_next(index.fp, index.tbx, index.hts_iter, &str) >= 0)
   {
     line = str.s;
     return true;
@@ -172,12 +172,11 @@ readRecord(VcfRecord & record, Tabix & index)
  * @param[in,out] index Tabix index.
  * @param[in] region The region to change to. It should be on the format chrX or chrX:Y-Z.
  */
-inline bool
+inline void
 setRegion(Tabix & index, const char * region)
 {
     tbx_itr_destroy(index.hts_iter);
     index.hts_iter = tbx_itr_querys(index.tbx, region);
-    return true;
 }
 
 /**
@@ -204,6 +203,19 @@ readRegion(seqan::String<VcfRecord> & records, Tabix & index, const char * regio
 
 
 inline bool
+readRegion(VcfRecord & record, Tabix & index)
+{
+    seqan::String<char> line;
+
+    if (!_extractLineOfThisRId(line, index))
+        return false;
+
+    _insertDataToVcfRecord(record, line, index.rID);
+    return true;
+}
+
+
+inline void
 open(Tabix & index, char const * vcfFilename)
 {
   clear(index);
@@ -228,7 +240,7 @@ open(Tabix & index, char const * vcfFilename)
 
   std::free(fnidx);
 
-  if ((index.fn = hts_open(vcfFilename, "r")) == 0)
+  if ((index.fp = hts_open(vcfFilename, "r")) == 0)
   {
     SEQAN_FAIL("Fail to open the VCF file.");
   }
