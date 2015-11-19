@@ -216,7 +216,7 @@ readRegion(VcfRecord & record, Tabix & index)
 
 
 inline void
-open(Tabix & index, char const * vcfFilename)
+open(Tabix & index, char const * vcfFilename, const char * fileMode = "r")
 {
   clear(index);
   struct stat stat_tbi,stat_vcf;
@@ -240,7 +240,7 @@ open(Tabix & index, char const * vcfFilename)
 
   std::free(fnidx);
 
-  if ((index.fp = hts_open(vcfFilename, "r")) == 0)
+  if ((index.fp = hts_open(vcfFilename, fileMode)) == 0)
   {
     SEQAN_FAIL("Fail to open the VCF file.");
   }
