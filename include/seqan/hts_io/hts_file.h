@@ -13,10 +13,6 @@
 namespace seqan
 {
 
-struct Hts_;
-typedef Tag<Hts_> Hts;
-typedef FormattedFile<Hts, Input> HtsFileTest;
-
 class HtsFile
 {
   public:
