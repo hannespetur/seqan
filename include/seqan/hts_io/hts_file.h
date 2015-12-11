@@ -1,12 +1,23 @@
 #ifndef SEQAN_HTS_IO_HTS_FILE_IN_H_
 #define SEQAN_HTS_IO_HTS_FILE_IN_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <iostream>
+#include <sys/types.h>
+
+#include <seqan/basic.h>
+
 #include <htslib/hfile.h>
 #include <htslib/hts.h>
 #include <htslib/sam.h>
 // #include <htslib/vcf.h>
 #include <htslib/bgzf.h>
 
+#include <seqan/hts_io/bam_alignment_record.h>
 #include <seqan/hts_io/hts_alignment_record.h>
 
 
@@ -23,6 +34,13 @@ class HtsFile
     hts_idx_t * hts_index;  /** @brief The index of the file. */
     hts_itr_t * hts_iter;   /** @brief An iterator that iterates through a certain region in the HTS file. */
     const char * file_mode; /** @brief Which file mode to use. E.g. "r" for reading and "wb" for writing binaries. */
+    bool at_end = false;
+
+    /**
+     * @brief Empty HTS file constructor
+     */
+    HtsFile(const char * mode = "r")
+      : filename(""), fp(NULL), hdr(NULL), hts_record(NULL), hts_index(NULL), hts_iter(NULL), file_mode(mode), at_end(false) {}
 
     /**
      * @brief Constructs a new HtsFile object.
@@ -31,19 +49,10 @@ class HtsFile
      * @param mode The file mode to use when opening the file.
      * @return A new HtsFile object.
      */
-    HtsFile(const char * f, const char * mode = "r")
-      : filename(f), fp(NULL), hdr(NULL), hts_record(NULL), hts_index(NULL), hts_iter(NULL), file_mode(mode)
+    HtsFile(const char * f, const char * mode)
+      : filename(f), fp(NULL), hdr(NULL), hts_record(NULL), hts_index(NULL), hts_iter(NULL), file_mode(mode), at_end(false)
     {
-        static const char * read_mode = "r";
-        fp = hts_open(filename, file_mode);
-
-        if (fp == NULL)
-            SEQAN_FAIL("Could not open file with filename %s", filename);
-
-        if (file_mode == read_mode)
-            hdr = sam_hdr_read(fp);
-
-        hts_record = bam_init1();
+        open();
     }
 
     /**
@@ -54,7 +63,65 @@ class HtsFile
         bam_hdr_destroy(hdr);
         hts_close(fp);
     }
+
+    inline bool
+    open()
+    {
+        static const char * read_mode = "r";
+        fp = hts_open(filename, file_mode);
+
+        if (fp == NULL)
+        {
+            // return false;
+            SEQAN_FAIL("Could not open file with filename %s", filename);
+        }
+
+        if (file_mode == read_mode)
+        {
+            hdr = sam_hdr_read(fp);
+        }
+
+        hts_record = bam_init1();
+        return true;
+    }
 };
+
+class HtsFileIn : public HtsFile
+{
+  public:
+    HtsFileIn()
+      : HtsFile("r") {}
+
+    HtsFileIn(const char * f)
+      : HtsFile(f, "r") {}
+};
+
+class HtsFileOut : public HtsFile
+{
+  public:
+    HtsFileOut()
+      : HtsFile("w") {}
+
+    HtsFileOut(const char * f)
+      : HtsFile(f, "w") {}
+};
+
+typedef HtsFileIn BamFileIn;
+typedef HtsFileOut BamFileOut;
+
+inline bool
+open(HtsFile & target, const char * f)
+{
+    target.filename = f;
+    return target.open();
+}
+
+inline bool
+open(HtsFile & target, std::istream & s)
+{
+    return open(target, "-");
+}
+
 
 /**
  * @brief Copies a header from a source HTS file and replaces the header of the target.
@@ -78,30 +145,6 @@ inline void
 copyRecord(HtsFile & target, HtsFile const & source)
 {
     target.hts_record = bam_dup1(source.hts_record);
-}
-
-/**
- * @brief Writes a HTS header to disk.
- * 
- * @param file HTS file to get the header from.
- * @returns True on success, otherwise false.
- */
-inline bool
-writeHeader(HtsFile & file)
-{
-    return !sam_hdr_write(file.fp, file.hdr);
-}
-
-/**
- * @brief Writes a HTS record to disk. Returns 
- * 
- * @param file HTS file to get the record from.
- * @returns True on success, otherwise false.
- */
-inline bool
-writeRecord(HtsFile & file)
-{
-    return !sam_write1(file.fp, file.hdr, file.hts_record);
 }
 
 /**
@@ -173,6 +216,18 @@ setRegion(HtsFile & file, const char * region)
     file.hts_iter = sam_itr_querys(file.hts_index, file.hdr, region);
 }
 
+inline bool
+atEnd(HtsFile const & file)
+{
+    return file.at_end;
+}
+
+inline bool
+atEnd(HtsFileIn const & file)
+{
+    return file.at_end;
+}
+
 /**
  * @brief Read the next record from a HTS file.
  * 
@@ -182,7 +237,13 @@ setRegion(HtsFile & file, const char * region)
 inline bool
 readRecord(HtsFile & file)
 {
-    return sam_read1(file.fp, file.hdr, file.hts_record) >= 0;
+    if (sam_read1(file.fp, file.hdr, file.hts_record) >= 0)
+    {
+        return true;
+    }
+
+    file.at_end = true;
+    return false;
 }
 
 /**
@@ -198,6 +259,21 @@ readRecord(HtsSequenceRecord & record, HtsFile & file)
     if (readRecord(file))
     {
         record.parse(file.hts_record);
+        return true;
+    }
+    else
+    {
+        // We've reached the end of the file, or an error occured.
+        return false;
+    }
+}
+
+inline bool
+readRecord(BamAlignmentRecord & record, HtsFile & file)
+{
+    if (readRecord(file))
+    {
+        parse(record, file.hts_record, file.hdr);
         return true;
     }
     else
@@ -228,6 +304,38 @@ readRegion(HtsSequenceRecord & record, HtsFile & file)
         return false;
     }
 }
+
+/**
+ * @brief Writes a HTS header to disk.
+ * 
+ * @param file HTS file to get the header from.
+ * @returns True on success, otherwise false.
+ */
+inline bool
+writeHeader(HtsFileOut & file)
+{
+    return !sam_hdr_write(file.fp, file.hdr);
+}
+
+/**
+ * @brief Writes a HTS record to disk. Returns 
+ * 
+ * @param file HTS file to get the record from.
+ * @returns True on success, otherwise false.
+ */
+inline bool
+writeRecord(HtsFile & file)
+{
+    return !sam_write1(file.fp, file.hdr, file.hts_record);
+}
+
+inline bool
+writeRecord(HtsFile & file, BamAlignmentRecord const & record)
+{
+    parse(file.hts_record, file.hdr, record);
+    return writeRecord(file);
+}
+
 
 } // namespace seqan
 

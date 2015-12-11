@@ -1,6 +1,8 @@
 #ifndef SEQAN_HTS_IO_HTS_ALIGNMENT_RECORD_H_
 #define SEQAN_HTS_IO_HTS_ALIGNMENT_RECORD_H_
 
+#include <seqan/basic.h>
+
 #include <cstdio>
 
 #include <htslib/hfile.h>

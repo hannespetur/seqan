@@ -37,6 +37,8 @@
 #ifndef INCLUDE_SEQAN_BAM_IO_BAM_RECORD_H_
 #define INCLUDE_SEQAN_BAM_IO_BAM_RECORD_H_
 
+#include <seqan/bam_io/cigar.h>
+
 namespace seqan {
 
 // ============================================================================

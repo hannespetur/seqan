@@ -47,11 +47,9 @@
 #include <seqan/misc/name_store_cache.h>
 #include <seqan/stream.h>
 
-#if SEQAN_USE_HTSLIB
 #include <htslib/bgzf.h>
 #include <htslib/tbx.h>
 #include <htslib/kseq.h>
-#endif  // #if SEQAN_USE_HTSLIB
 
 // ===========================================================================
 // First Header Group.
@@ -59,9 +57,7 @@
 
 #include <seqan/vcf_io/vcf_header_record.h>
 
-#if SEQAN_USE_HTSLIB
 #include <seqan/vcf_io/tabix.h>
-#endif  // #if SEQAN_USE_HTSLIB
 #include <seqan/vcf_io/vcf_header.h>
 #include <seqan/vcf_io/vcf_record.h>
 #include <seqan/vcf_io/vcf_io_context.h>

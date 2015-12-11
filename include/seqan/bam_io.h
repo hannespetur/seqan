@@ -73,13 +73,13 @@
 // Easy BAM / SAM I/O.
 // ===========================================================================
 
-#include <seqan/bam_io/bam_file.h>
+//#include <seqan/bam_io/bam_file.h>
 
 // ===========================================================================
 // Utility Routines.
 // ===========================================================================
 
-#include <seqan/bam_io/bam_alignment_record_util.h>
+#include <seqan/bam_io/bam_alignment_record_util.h> 
 
 // Not included by default, requires C++11
 //#include <seqan/bam_io/bam_scanner_cache.h>
@@ -88,14 +88,14 @@
 // BAM Index Related.
 // ===========================================================================
 
+#include <seqan/hts_io.h>
+
 // BAM indices are only available when ZLIB is available.
 #if SEQAN_HAS_ZLIB
 #include <seqan/bam_io/bam_index_bai.h>
-#endif  // #if SEQAN_HAS_ZLIB
+#endif  // #if SEQAN_HAS_ZLIB*/
 
-#if SEQAN_USE_HTSLIB
-#include <seqan/hts_io/hts_alignment_record.h>
-#include <seqan/hts_io/hts_file.h>
-#endif  // #if SEQAN_USE_HTSLIB
+
+
 
 #endif  // INCLUDE_SEQAN_BAM_IO_H_

@@ -635,6 +635,7 @@ inline void _baiAddAlignmentChunkToBin(BamIndex<Bai> & index,
  *
  * @return bool <tt>true</tt> on success, <tt>false</tt> otherwise.
  */
+/*
 inline bool build(BamIndex<Bai> & index, char const * bamFilename)
 {
     // SEQAN_FAIL("This does not work yet!");
@@ -787,7 +788,7 @@ inline bool build(BamIndex<Bai> & index, char const * bamFilename)
     // SEQAN_FAIL("TODO: Merge bins!");
     return true;
 }
-
+*/
 
 }  // namespace seqan
 

@@ -64,9 +64,9 @@
 #include <seqan/store/store_align_intervals.h>
 #include <seqan/store/store_intervaltree.h>
 
-#include <seqan/store/store_io.h>
-#include <seqan/store/store_io_sam.h>
-#include <seqan/store/store_io_gff.h>
-#include <seqan/store/store_io_ucsc.h>
+// #include <seqan/store/store_io.h>
+// #include <seqan/store/store_io_sam.h>
+// #include <seqan/store/store_io_gff.h>
+// #include <seqan/store/store_io_ucsc.h>
 
 #endif //#ifndef SEQAN_HEADER_...
