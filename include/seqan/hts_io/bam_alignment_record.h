@@ -249,7 +249,7 @@ parse(BamAlignmentRecord & record, bam1_t * hts_record)
   /* Parse sequence */
   resize(record.seq, record._l_qseq, Exact());
 
-  for (unsigned i = 0; i < record._l_qseq; ++i)
+  for (int i = 0; i < record._l_qseq; ++i)
   {
     record.seq[i] = "=ACMGRSVTWYHKDBN"[bam_seqi(it, i)];
   }
@@ -259,7 +259,7 @@ parse(BamAlignmentRecord & record, bam1_t * hts_record)
   /* Parse qualities */
   resize(record.qual, record._l_qseq, Exact());
 
-  for (unsigned i = 0; i < record._l_qseq; ++i, ++it)
+  for (int i = 0; i < record._l_qseq; ++i, ++it)
   {
     record.qual[i] = static_cast<char>(*it + 33);
   }

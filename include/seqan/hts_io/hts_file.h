@@ -100,10 +100,10 @@ class HtsFileOut : public HtsFile
 {
   public:
     HtsFileOut()
-      : HtsFile("w") {}
+      : HtsFile("wb") {}
 
     HtsFileOut(const char * f)
-      : HtsFile(f, "w") {}
+      : HtsFile(f, "wb") {}
 };
 
 
