@@ -19,11 +19,83 @@ This is a fork of SeqAn, with added extensibility of the htslib. List of new add
         + Parsing of qName, seq, qual and cigar implemented. The rest is **not**.
 
 
-To make use of these features you need to add `-DSEQAN_USE_HTSLIB=1` to your CXX compiler flags. If you need a feature which is not implemented you can ask me (Hannes Pétur, hannese@decode.is) to add it, or use the `htslib API <https://github.com/samtools/htslib>`_ directly.
+If you need a feature which is not implemented you can ask me (Hannes Pétur, hannese@decode.is) to add it, or use the `htslib API <https://github.com/samtools/htslib>`_ directly.
+
+
+API differences
+---------------
+
+There are only a few difference between the main SeqAn repository and this one. The differences will be specified here.
+
+The 'BamIndex' object
+~~~~~~~~~~~~~~~~~~~~~
+
+BamIndex and BamFileIn (or -Out) have been merged into one object called BamFileIn (or -Out). A pointer to the index is simply an instance variable of BamFile. If no index has been loaded or created it is a null pointer. For example, this:
+
+.. code-block:: cpp
+
+  BamFileIn bamFileIn;
+  open(bamFileIn, ...);
+  CharString baiPathIn = "my/path/to/index";
+  BamIndex<Bai> baiIndex;
+  if (!open(baiIndex, toCString(baiPathIn)))
+  {
+    std::cerr << "ERROR: Could not read BAI index file " << baiPathIn << "\n";
+    return 1;
+  }
+
+can be changed to this
+
+.. code-block:: cpp
+
+  BamFileIn bamFileIn;
+  open(bamFileIn, ...);
+  CharString baiPathIn = "my/path/to/index";
+  if (!loadIndex(bamFileIn, toCString(baiPathIn)))
+  {
+    std::cerr << "ERROR: Could not read BAI index file " << baiPathIn << "\n";
+    return 1;
+  }
+
+
+The 'context' function
+~~~~~~~~~~~~~~~~~~~~~~
+The 'context' function is not defined or any other function that uses it for two reasons: One, there is nothing in htslib which is a sensible replacement object to it, and two, this is probably something the user doesn't need to worry about. A typical example is if the user wants to read a specified region of an alignment file. In that case the user must first use the context to figure out which rID the was specified for the region in the header.
+
+.. code-block:: cpp
+
+  CharString chr = "chr19";
+  int start = 3000;
+  int end = 4000;
+  int rID = 0;
+  if (!getIdByName(rID, contigNamesCache(context(bamFileIn)), chr))
+  {
+    std::cerr << "ERROR: Reference sequence named " << chr << " not known.\n";
+    return 1;
+  }
+  bool hasAlignments = false;
+  if (!jumpToRegion(bamFileIn, hasAlignments, rID, start, end, baiIndex))
+  {
+    std::cerr << "ERROR: Could not jump to " << start << ":" << end << "\n";
+    return 1;
+  }
+
+This can be changed to
+
+.. code-block:: cpp
+  CharString chr = "chr19";
+  int start = 3000;
+  int end = 4000;
+  int rID = 0;
+  if (!setRegion(bamFileIn, toCString(chr), start, end))
+  {
+    std::cerr << "ERROR: Could not jump to " << chr << ":" << start << "-" << end << "\n";
+    return 1;
+  }
 
 
 Examples
---------------
+--------
 BCF/Tabix example
 ~~~~~~~~~~~~~~~~~
 .. code-block:: cpp

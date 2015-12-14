@@ -207,19 +207,26 @@ buildIndex(HtsFile & file, const char * indexFileName, int min_shift = 0)
  * @param file HTS file to change index on.
  * @param region The region to go to. Should be on one of these formats: chrX, chrX:A, or chrX:A-B.
  */
-inline void
+inline bool
 setRegion(HtsFile & file, const char * region)
 {
     if (file.hts_iter != NULL)
         sam_itr_destroy(file.hts_iter);
 
     file.hts_iter = sam_itr_querys(file.hts_index, file.hdr, region);
+    return file.hts_iter != NULL;
 }
 
 inline bool
-atEnd(HtsFile const & file)
+setRegion(HtsFile & file, const char * chromosome, int start, int end)
 {
-    return file.at_end;
+    if (file.hts_iter != NULL)
+        sam_itr_destroy(file.hts_iter);
+
+    char region[50];
+    sprintf(region, "%s:%d-%d", chromosome, start, end);
+    file.hts_iter = sam_itr_querys(file.hts_index, file.hdr, region);
+    return file.hts_iter != NULL;
 }
 
 inline bool
