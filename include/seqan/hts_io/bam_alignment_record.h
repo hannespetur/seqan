@@ -223,19 +223,9 @@ toString(BamAlignmentRecord const & record, bam_hdr_t * hdr)
 
 
 inline bool
-parse(BamAlignmentRecord & record, bam1_t * hts_record, bam_hdr_t * hdr)
+parse(BamAlignmentRecord & record, bam1_t * hts_record)
 {
   syncCores(record, hts_record);
-  
-  /* htslib parsing
-  kstring_t * parsed_data = reinterpret_cast<kstring_t *>(calloc(1, sizeof(kstring_t)));
-  sam_format1(hdr, hts_record, parsed_data);
-  std::string data(parsed_data->s, parsed_data->l);
-  free (parsed_data);
-  std::cerr << "parsed_data = " << std::endl;
-  std::cerr << data << std::endl;
-  */
-
   resize(record.qName, record._l_qname-1, Exact());
   auto it = hts_record->data;
   arrayCopyForward(it, it + record._l_qname - 1, begin(record.qName, Standard()));
@@ -259,7 +249,7 @@ parse(BamAlignmentRecord & record, bam1_t * hts_record, bam_hdr_t * hdr)
   /* Parse sequence */
   resize(record.seq, record._l_qseq, Exact());
 
-  for (int i = 0; i < record._l_qseq; ++i)
+  for (unsigned i = 0; i < record._l_qseq; ++i)
   {
     record.seq[i] = "=ACMGRSVTWYHKDBN"[bam_seqi(it, i)];
   }
@@ -277,13 +267,6 @@ parse(BamAlignmentRecord & record, bam1_t * hts_record, bam_hdr_t * hdr)
   it = bam_get_aux(hts_record);
   resize(record.tags, bam_get_l_aux(hts_record), Exact());
   arrayCopyForward(it, it + bam_get_l_aux(hts_record), begin(record.tags, Standard()));
-
-  /* Debugging */
-  /*
-  std::cerr << "After data =" << std::endl;
-  std::string after_data = toString(record, hdr);
-  std::cerr << after_data << std::endl;
-  */
 
   return true;
 }

@@ -106,9 +106,18 @@ class HtsFileOut : public HtsFile
       : HtsFile(f, "w") {}
 };
 
+
+/* For backwards compability */
 typedef HtsFileIn BamFileIn;
 typedef HtsFileOut BamFileOut;
 
+
+/**
+ * @brief Opens a HTS file from filename.
+ * 
+ * @param target An empty HtsFile object.
+ * @param f The filename to open from.
+ */
 inline bool
 open(HtsFile & target, const char * f)
 {
@@ -116,8 +125,14 @@ open(HtsFile & target, const char * f)
     return target.open();
 }
 
+/**
+ * @brief Opens a HTS from stream (e.g. std::cin).
+ * 
+ * @param target An empty HtsFile object.
+ * @param s The stream to read from.
+ */
 inline bool
-open(HtsFile & target, std::istream & s)
+open(HtsFile & target, std::istream &)
 {
     return open(target, "-");
 }
@@ -229,6 +244,12 @@ setRegion(HtsFile & file, const char * chromosome, int start, int end)
     return file.hts_iter != NULL;
 }
 
+/**
+ * @brief Check if the have read the last of record of an input file.
+ * 
+ * @param file An input file.
+ * @return True if we have read the last record.
+ */
 inline bool
 atEnd(HtsFileIn const & file)
 {
@@ -275,12 +296,18 @@ readRecord(HtsSequenceRecord & record, HtsFile & file)
     }
 }
 
+/**
+ * @brief Reads an alignment record.
+ * 
+ * @param record The record to insert data into.
+ * @param file The file to read from.
+ */
 inline bool
 readRecord(BamAlignmentRecord & record, HtsFile & file)
 {
     if (readRecord(file))
     {
-        parse(record, file.hts_record, file.hdr);
+        parse(record, file.hts_record);
         return true;
     }
     else
@@ -336,6 +363,12 @@ writeRecord(HtsFile & file)
     return !sam_write1(file.fp, file.hdr, file.hts_record);
 }
 
+/**
+ * @brief Writes a record to file.
+ * 
+ * @param file The file to write to.
+ * @param record The record to write.
+ */
 inline bool
 writeRecord(HtsFile & file, BamAlignmentRecord const & record)
 {
@@ -345,6 +378,5 @@ writeRecord(HtsFile & file, BamAlignmentRecord const & record)
 
 
 } // namespace seqan
-
 
 #endif  // SEQAN_HTS_IO_HTS_FILE_IN_H_
