@@ -30,7 +30,7 @@ class HtsSequenceRecord
         HtsSequenceRecord::parse(hts_record);
     }
 
-    virtual void parse(bam1_t * hts_record)
+    void parse(bam1_t * hts_record)
     {
         qName = bam_get_qname(hts_record);
         int32_t lqseq = hts_record->core.l_qseq;
@@ -44,7 +44,7 @@ class HtsSequenceRecord
     }
 };
 
-
+/*
 class HtsAlignmentRecord : public HtsSequenceRecord
 {
   public:
@@ -79,7 +79,7 @@ class HtsAlignmentRecord : public HtsSequenceRecord
         }
     }
 };
-
+*/
 } // namespace seqan
 
 #endif // SEQAN_HTS_IO_HTS_ALIGNMENT_RECORD_H_
