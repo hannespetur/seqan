@@ -275,7 +275,7 @@ inline bool
 parse(bam1_t * hts_record, bam_hdr_t * hdr, BamAlignmentRecord const & record)
 {
   kstring_t * s = static_cast<kstring_t*>(calloc(1, sizeof(kstring_t)));
-  ksprintf(s, toString(record, hdr).data());
+  ksprintf(s, "%s", toString(record, hdr).data());
   sam_parse1(s, hdr, hts_record);
   return true;
 }

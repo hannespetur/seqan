@@ -94,6 +94,20 @@ _extractLineOfThisRId(String<char> & line, Tabix & index)
   return false;
 }
 
+inline bool
+_extractLineOfThisRId(std::string & line, Tabix & index)
+{
+  kstring_t str = {0,0,0};
+
+  if (index.hts_iter && tbx_itr_next(index.fp, index.tbx, index.hts_iter, &str) >= 0)
+  {
+    line = str.s;
+    return true;
+  }
+
+  return false;
+}
+
 inline void
 _insertDataToVcfRecord(VcfRecord & record, String<char> const & line, unsigned const & rID)
 {
@@ -124,6 +138,29 @@ _insertDataToVcfRecord(VcfRecord & record, String<char> const & line, unsigned c
  */
 inline bool
 readRawRecord(String<char> & line, Tabix & index)
+{
+  while (!_onLastRId(index))
+  {
+    if(_extractLineOfThisRId(line, index))
+    {
+      return true;
+    }
+
+    _nextRId(index);
+  }
+
+  // We are on the last rID.
+  if(_extractLineOfThisRId(line, index))
+  {
+    return true;
+  }
+
+  return false;
+}
+
+
+inline bool
+readRawRecord(std::string & line, Tabix & index)
 {
   while (!_onLastRId(index))
   {
