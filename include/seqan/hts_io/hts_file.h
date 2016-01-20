@@ -40,7 +40,7 @@ class HtsFile
      * @brief Empty HTS file constructor
      */
     HtsFile(const char * mode = "r")
-      : filename(""), fp(NULL), hdr(NULL), hts_record(NULL), hts_index(NULL), hts_iter(NULL), file_mode(mode), at_end(false) {}
+      : filename(""), fp(nullptr), hdr(nullptr), hts_record(nullptr), hts_index(nullptr), hts_iter(nullptr), file_mode(mode), at_end(false) {}
 
     /**
      * @brief Constructs a new HtsFile object.
@@ -50,7 +50,7 @@ class HtsFile
      * @return A new HtsFile object.
      */
     HtsFile(const char * f, const char * mode)
-      : filename(f), fp(NULL), hdr(NULL), hts_record(NULL), hts_index(NULL), hts_iter(NULL), file_mode(mode), at_end(false)
+      : filename(f), fp(nullptr), hdr(nullptr), hts_record(nullptr), hts_index(nullptr), hts_iter(nullptr), file_mode(mode), at_end(false)
     {
         open();
     }
@@ -70,7 +70,7 @@ class HtsFile
         static const char * read_mode = "r";
         fp = hts_open(filename, file_mode);
 
-        if (fp == NULL)
+        if (fp == nullptr)
         {
             // return false;
             SEQAN_FAIL("Could not open file with filename %s", filename);
@@ -172,7 +172,7 @@ inline bool
 loadIndex(HtsFile & file)
 {
     file.hts_index = sam_index_load(file.fp, file.filename);
-    return file.hts_index != NULL;
+    return file.hts_index != nullptr;
 }
 
 /**
@@ -185,7 +185,7 @@ inline bool
 loadIndex(HtsFile & file, const char * indexFileName)
 {
     file.hts_index = sam_index_load2(file.fp, file.filename, indexFileName);
-    return file.hts_index != NULL;
+    return file.hts_index != nullptr;
 }
 
 /**
@@ -225,23 +225,33 @@ buildIndex(HtsFile & file, const char * indexFileName, int min_shift = 0)
 inline bool
 setRegion(HtsFile & file, const char * region)
 {
-    if (file.hts_iter != NULL)
+    if (file.hts_iter != nullptr)
         sam_itr_destroy(file.hts_iter);
 
     file.hts_iter = sam_itr_querys(file.hts_index, file.hdr, region);
-    return file.hts_iter != NULL;
+    return file.hts_iter != nullptr;
 }
 
 inline bool
 setRegion(HtsFile & file, const char * chromosome, int start, int end)
 {
-    if (file.hts_iter != NULL)
+    if (file.hts_iter != nullptr)
         sam_itr_destroy(file.hts_iter);
 
     char region[50];
     sprintf(region, "%s:%d-%d", chromosome, start, end);
     file.hts_iter = sam_itr_querys(file.hts_index, file.hdr, region);
-    return file.hts_iter != NULL;
+    return file.hts_iter != nullptr;
+}
+
+inline bool
+setRegion(HtsFile & file, int32_t tid, int32_t start, int32_t end)
+{
+    if (file.hts_iter != nullptr)
+        sam_itr_destroy(file.hts_iter);
+
+    file.hts_iter = sam_itr_queryi(file.hts_index, tid, start, end);
+    return file.hts_iter != nullptr;
 }
 
 /**
@@ -327,6 +337,8 @@ readRecord(BamAlignmentRecord & record, HtsFile & file)
 inline bool
 readRegion(HtsSequenceRecord & record, HtsFile & file)
 {
+    // std::cout << "s" << (file.fp == nullptr) << (file.hts_iter == nullptr) << (file.hts_record == nullptr) << std::endl;
+
     if (sam_itr_next(file.fp, file.hts_iter, file.hts_record) >= 0)
     {
         record.parse(file.hts_record);
