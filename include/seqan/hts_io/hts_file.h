@@ -229,7 +229,7 @@ setRegion(HtsFile & file, const char * region)
         sam_itr_destroy(file.hts_iter);
 
     file.hts_iter = sam_itr_querys(file.hts_index, file.hdr, region);
-    return file.hts_iter != nullptr;
+    return file.hts_iter;
 }
 
 inline bool
@@ -251,7 +251,7 @@ setRegion(HtsFile & file, int32_t tid, int32_t start, int32_t end)
         sam_itr_destroy(file.hts_iter);
 
     file.hts_iter = sam_itr_queryi(file.hts_index, tid, start, end);
-    return file.hts_iter != nullptr;
+    return file.hts_iter;
 }
 
 /**
