@@ -230,9 +230,8 @@ parse(BamAlignmentRecord & record, bam1_t * hts_record)
   auto it = hts_record->data;
   arrayCopyForward(it, it + record._l_qname - 1, begin(record.qName, Standard()));
   it += record._l_qname;
-  
 
-  /* Parse CIGAR */
+  // Parse CIGAR
   resize(record.cigar, record._n_cigar, Exact());
   static char const * CIGAR_MAPPING = "MIDNSHP=X*******";
 
@@ -246,7 +245,7 @@ parse(BamAlignmentRecord & record, bam1_t * hts_record)
     cig->count = opAndCnt >> 4;
   }
 
-  /* Parse sequence */
+  // Parse sequence
   resize(record.seq, record._l_qseq, Exact());
 
   for (int i = 0; i < record._l_qseq; ++i)
@@ -256,7 +255,7 @@ parse(BamAlignmentRecord & record, bam1_t * hts_record)
 
   it += (hts_record->core.l_qseq + 1) >> 1;
 
-  /* Parse qualities */
+  // Parse qualities
   resize(record.qual, record._l_qseq, Exact());
 
   for (int i = 0; i < record._l_qseq; ++i, ++it)
@@ -277,6 +276,8 @@ parse(bam1_t * hts_record, bam_hdr_t * hdr, BamAlignmentRecord const & record)
   kstring_t * s = static_cast<kstring_t*>(calloc(1, sizeof(kstring_t)));
   ksprintf(s, "%s", toString(record, hdr).data());
   sam_parse1(s, hdr, hts_record);
+  free(s->s);
+  free(s);
   return true;
 }
 
