@@ -3,7 +3,7 @@
 
 #include <cstdlib>
 #include <string>
-#include <stdlib.h>
+// #include <stdlib.h>
 #include <sys/stat.h>
 #include <iostream>
 #include <cstring>
@@ -55,6 +55,8 @@ getHeader(String<char> & header, Tabix & index)
     }
   }
 
+  free(str.s);
+
   // set back to start
   // index.rID = 0;
 
@@ -88,9 +90,11 @@ _extractLineOfThisRId(String<char> & line, Tabix & index)
   if (index.hts_iter && tbx_itr_next(index.fp, index.tbx, index.hts_iter, &str) >= 0)
   {
     line = str.s;
+    free(str.s);
     return true;
   }
 
+  free(str.s);
   return false;
 }
 
@@ -102,9 +106,13 @@ _extractLineOfThisRId(std::string & line, Tabix & index)
   if (index.hts_iter && tbx_itr_next(index.fp, index.tbx, index.hts_iter, &str) >= 0)
   {
     line = str.s;
+    free(str.s);
+    // free(str);
     return true;
   }
 
+  free(str.s);
+  // free(str);
   return false;
 }
 

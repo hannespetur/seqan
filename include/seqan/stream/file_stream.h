@@ -56,16 +56,16 @@ namespace seqan {
 // Functions
 // ============================================================================
 
-template <typename TValue, typename TSpec>
-inline void
-free(Buffer<TValue, TSpec> & me)
-{
-#ifdef PLATFORM_WINDOWS
-    VirtualFree(me.begin, 0, MEM_RELEASE);
-#else
-    ::free(me.begin);
-#endif
-}
+// template <typename TValue, typename TSpec>
+// inline void
+// free(Buffer<TValue, TSpec> & me)
+// {
+// #ifdef PLATFORM_WINDOWS
+//     VirtualFree(me.begin, 0, MEM_RELEASE);
+// #else
+//     ::free(me.begin);
+// #endif
+// }
 
 template <typename TValue, typename TSpec>
 inline void
