@@ -107,12 +107,10 @@ _extractLineOfThisRId(std::string & line, Tabix & index)
   {
     line = str.s;
     free(str.s);
-    // free(str);
     return true;
   }
 
   free(str.s);
-  // free(str);
   return false;
 }
 
