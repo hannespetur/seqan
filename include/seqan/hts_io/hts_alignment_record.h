@@ -16,6 +16,7 @@ class HtsSequenceRecord
   public:
     String<char> qName;
     String<Iupac> seq;
+    String<char> qual;
 
     static __int32 const INVALID_POS = -1;
     static __int32 const INVALID_REF_ID = -1;
@@ -23,7 +24,7 @@ class HtsSequenceRecord
     static __uint32 const INVALID_QID = 4294967295u;
 
     HtsSequenceRecord()
-      : qName(), seq() {}
+      : qName(), seq(), qual() {}
 
     HtsSequenceRecord(bam1_t * hts_record)
     {
@@ -40,6 +41,14 @@ class HtsSequenceRecord
         for (int i = 0; i < lqseq; ++i)
         {
           seq[i] = "=ACMGRSVTWYHKDBN"[bam_seqi(seqptr, i)];
+        }
+
+        uint8_t* qualptr = bam_get_qual(hts_record);
+        resize(qual, lqseq, Exact());
+
+        for (int i = 0; i < lqseq; ++i, ++qualptr)
+        {
+            qual[i] = static_cast<char>(*qualptr + 33);
         }
     }
 };

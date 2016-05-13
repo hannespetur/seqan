@@ -82,7 +82,7 @@
 #include <seqan/bam_io/bam_alignment_record_util.h> 
 
 // Not included by default, requires C++11
-//#include <seqan/bam_io/bam_scanner_cache.h>
+// #include <seqan/bam_io/bam_scanner_cache.h>
 
 // ===========================================================================
 // BAM Index Related.

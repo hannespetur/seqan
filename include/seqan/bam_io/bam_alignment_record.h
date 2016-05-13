@@ -321,6 +321,12 @@ hasFlagMultiple(BamAlignmentRecord const & record)
     return (record.flag & BAM_FLAG_MULTIPLE) == BAM_FLAG_MULTIPLE;
 }
 
+inline void
+toggleFlagMultiple(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_MULTIPLE;
+}
+
 // ----------------------------------------------------------------------------
 // Function hasFlagAllProper()
 // ----------------------------------------------------------------------------
@@ -343,6 +349,12 @@ inline bool
 hasFlagAllProper(BamAlignmentRecord const & record)
 {
     return (record.flag & BAM_FLAG_ALL_PROPER) == BAM_FLAG_ALL_PROPER;
+}
+
+inline void
+toggleFlagAllProper(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_ALL_PROPER;
 }
 
 // ----------------------------------------------------------------------------
@@ -369,6 +381,13 @@ hasFlagUnmapped(BamAlignmentRecord const & record)
     return (record.flag & BAM_FLAG_UNMAPPED) == BAM_FLAG_UNMAPPED;
 }
 
+inline void
+toggleFlagUnmapped(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_UNMAPPED;
+}
+
+
 // ----------------------------------------------------------------------------
 // Function hasFlagNextUnmapped()
 // ----------------------------------------------------------------------------
@@ -391,6 +410,12 @@ inline bool
 hasFlagNextUnmapped(BamAlignmentRecord const & record)
 {
     return (record.flag & BAM_FLAG_NEXT_UNMAPPED) == BAM_FLAG_NEXT_UNMAPPED;
+}
+
+inline void
+toggleFlagNextUnmapped(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_NEXT_UNMAPPED;
 }
 
 // ----------------------------------------------------------------------------
@@ -417,6 +442,12 @@ hasFlagRC(BamAlignmentRecord const & record)
     return (record.flag & BAM_FLAG_RC) == BAM_FLAG_RC;
 }
 
+inline void
+toggleFlagRC(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_RC;
+}
+
 // ----------------------------------------------------------------------------
 // Function hasFlagNextRC()
 // ----------------------------------------------------------------------------
@@ -439,6 +470,12 @@ inline bool
 hasFlagNextRC(BamAlignmentRecord const & record)
 {
     return (record.flag & BAM_FLAG_NEXT_RC) == BAM_FLAG_NEXT_RC;
+}
+
+inline void
+toggleFlagNextRC(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_NEXT_RC;
 }
 
 // ----------------------------------------------------------------------------
@@ -465,6 +502,12 @@ hasFlagFirst(BamAlignmentRecord const & record)
     return (record.flag & BAM_FLAG_FIRST) == BAM_FLAG_FIRST;
 }
 
+inline void
+toggleFlagFirst(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_FIRST;
+}
+
 // ----------------------------------------------------------------------------
 // Function hasFlagLast()
 // ----------------------------------------------------------------------------
@@ -487,6 +530,12 @@ inline bool
 hasFlagLast(BamAlignmentRecord const & record)
 {
     return (record.flag & BAM_FLAG_LAST) == BAM_FLAG_LAST;
+}
+
+inline void
+toggleFlagLast(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_LAST;
 }
 
 // ----------------------------------------------------------------------------
@@ -513,6 +562,12 @@ hasFlagSecondary(BamAlignmentRecord const & record)
     return (record.flag & BAM_FLAG_SECONDARY) == BAM_FLAG_SECONDARY;
 }
 
+inline void
+toggleFlagSecondary(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_SECONDARY;
+}
+
 // ----------------------------------------------------------------------------
 // Function hasFlagQCNoPass()
 // ----------------------------------------------------------------------------
@@ -535,6 +590,12 @@ inline bool
 hasFlagQCNoPass(BamAlignmentRecord const & record)
 {
     return (record.flag & BAM_FLAG_QC_NO_PASS) == BAM_FLAG_QC_NO_PASS;
+}
+
+inline void
+toggleFlagQCNoPass(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_QC_NO_PASS;
 }
 
 // ----------------------------------------------------------------------------
@@ -561,6 +622,13 @@ hasFlagDuplicate(BamAlignmentRecord const & record)
     return (record.flag & BAM_FLAG_DUPLICATE) == BAM_FLAG_DUPLICATE;
 }
 
+inline void
+toggleFlagDuplicate(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_DUPLICATE;
+}
+
+
 // ----------------------------------------------------------------------------
 // Function hasFlagSupplementary()
 // ----------------------------------------------------------------------------
@@ -581,6 +649,12 @@ inline bool
 hasFlagSupplementary(BamAlignmentRecord const & record)
 {
     return (record.flag & BAM_FLAG_SUPPLEMENTARY) == BAM_FLAG_SUPPLEMENTARY;
+}
+
+inline void
+toggleFlagSupplementary(BamAlignmentRecord & record)
+{
+    record.flag ^= BAM_FLAG_SUPPLEMENTARY;
 }
 
 // ----------------------------------------------------------------------------

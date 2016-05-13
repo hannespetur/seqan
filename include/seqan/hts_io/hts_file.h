@@ -337,11 +337,24 @@ readRecord(BamAlignmentRecord & record, HtsFile & file)
 inline bool
 readRegion(HtsSequenceRecord & record, HtsFile & file)
 {
-    // std::cout << "s" << (file.fp == nullptr) << (file.hts_iter == nullptr) << (file.hts_record == nullptr) << std::endl;
-
     if (sam_itr_next(file.fp, file.hts_iter, file.hts_record) >= 0)
     {
         record.parse(file.hts_record);
+        return true;
+    }
+    else
+    {
+        // We've reached the end of the file, or an error occured.
+        return false;
+    }
+}
+
+inline bool
+readRegion(BamAlignmentRecord & record, HtsFile & file)
+{
+    if (sam_itr_next(file.fp, file.hts_iter, file.hts_record) >= 0)
+    {
+        parse(record, file.hts_record);
         return true;
     }
     else
