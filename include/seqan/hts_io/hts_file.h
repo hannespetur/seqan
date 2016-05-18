@@ -44,7 +44,7 @@ class HtsFile
 
     /**
      * @brief Constructs a new HtsFile object.
-     * 
+     *
      * @param f The filename of the file.
      * @param mode The file mode to use when opening the file.
      * @return A new HtsFile object.
@@ -99,11 +99,11 @@ class HtsFileIn : public HtsFile
 class HtsFileOut : public HtsFile
 {
   public:
-    HtsFileOut()
-      : HtsFile("wb") {}
+    HtsFileOut(const char * mode = "wb")
+      : HtsFile(mode) {}
 
-    HtsFileOut(const char * f)
-      : HtsFile(f, "wb") {}
+    HtsFileOut(const char * f, const char * mode = "wb")
+      : HtsFile(f, mode) {}
 };
 
 
@@ -114,7 +114,7 @@ typedef HtsFileOut BamFileOut;
 
 /**
  * @brief Opens a HTS file from filename.
- * 
+ *
  * @param target An empty HtsFile object.
  * @param f The filename to open from.
  */
@@ -127,7 +127,7 @@ open(HtsFile & target, const char * f)
 
 /**
  * @brief Opens a HTS from stream (e.g. std::cin).
- * 
+ *
  * @param target An empty HtsFile object.
  * @param s The stream to read from.
  */
@@ -140,7 +140,7 @@ open(HtsFile & target, std::istream &)
 
 /**
  * @brief Copies a header from a source HTS file and replaces the header of the target.
- * 
+ *
  * @param target Target HTS file.
  * @param source Source HTS file.
  */
@@ -152,7 +152,7 @@ copyHeader(HtsFile & target, HtsFile const & source)
 
 /**
  * @brief Copies a record from a source HTS file and replaces the record of the target.
- * 
+ *
  * @param target Target HTS file.
  * @param source Source HTS file.
  */
@@ -164,7 +164,7 @@ copyRecord(HtsFile & target, HtsFile const & source)
 
 /**
  * @brief Loads an index for a HTS file using the default filename.
- * 
+ *
  * @param file HTS file to load index for.
  * @returns True on success, otherwise false.
  */
@@ -177,7 +177,7 @@ loadIndex(HtsFile & file)
 
 /**
  * @brief Loads an index for a HTS file with a specific filename.
- * 
+ *
  * @param file HTS file to load index for.
  * @param indexFileName The filename of the index.
  */
@@ -190,7 +190,7 @@ loadIndex(HtsFile & file, const char * indexFileName)
 
 /**
  * @brief Builds an index for BAM or CRAM files using the default filename.
- * 
+ *
  * @param file The file to build index for.
  * @param min_shift Force a certain minimum amount of shift. (I think) smaller shifts mean more accurate queries at the cost of index size.
  *                  The default value is 0, which means the default value of htslib will be used.
@@ -204,7 +204,7 @@ buildIndex(HtsFile & file, int min_shift = 0)
 
 /**
  * @brief Builds an index for BAM or CRAM files using a specific filename.
- * 
+ *
  * @param file The file to build index for.
  * @param min_shift Force a certain minimum amount of shift. (I think) smaller shifts mean more accurate queries at the cost of index size.
  *                  The default value is 0, which means the default value of htslib will be used.
@@ -218,7 +218,7 @@ buildIndex(HtsFile & file, const char * indexFileName, int min_shift = 0)
 
 /**
  * @brief Uses the index to go to a certain region of the HTS file.
- * 
+ *
  * @param file HTS file to change index on.
  * @param region The region to go to. Should be on one of these formats: chrX, chrX:A, or chrX:A-B.
  */
@@ -256,7 +256,7 @@ setRegion(HtsFile & file, int32_t tid, int32_t start, int32_t end)
 
 /**
  * @brief Check if the have read the last of record of an input file.
- * 
+ *
  * @param file An input file.
  * @return True if we have read the last record.
  */
@@ -268,7 +268,7 @@ atEnd(HtsFileIn const & file)
 
 /**
  * @brief Read the next record from a HTS file.
- * 
+ *
  * @param file HTS file to read from.
  * @returns True on success, otherwise false.
  */
@@ -286,7 +286,7 @@ readRecord(HtsFile & file)
 
 /**
  * @brief Read the next record from a HTS file and parse it to a sequence record.
- * 
+ *
  * @param record Sequencing record to write to.
  * @param file HTS file to read from.
  * @returns True on success, otherwise false.
@@ -308,7 +308,7 @@ readRecord(HtsSequenceRecord & record, HtsFile & file)
 
 /**
  * @brief Reads an alignment record.
- * 
+ *
  * @param record The record to insert data into.
  * @param file The file to read from.
  */
@@ -329,7 +329,7 @@ readRecord(BamAlignmentRecord & record, HtsFile & file)
 
 /**
  * @brief Read the next record from a region and parse it to a sequence record.
- * 
+ *
  * @param record Sequencing record to write to.
  * @param file HTS file to read from.
  * @returns True on success, otherwise false.
@@ -366,7 +366,7 @@ readRegion(BamAlignmentRecord & record, HtsFile & file)
 
 /**
  * @brief Writes a HTS header to disk.
- * 
+ *
  * @param file HTS file to get the header from.
  * @returns True on success, otherwise false.
  */
@@ -377,8 +377,8 @@ writeHeader(HtsFileOut & file)
 }
 
 /**
- * @brief Writes a HTS record to disk. Returns 
- * 
+ * @brief Writes a HTS record to disk. Returns
+ *
  * @param file HTS file to get the record from.
  * @returns True on success, otherwise false.
  */
@@ -390,7 +390,7 @@ writeRecord(HtsFile & file)
 
 /**
  * @brief Writes a record to file.
- * 
+ *
  * @param file The file to write to.
  * @param record The record to write.
  */
