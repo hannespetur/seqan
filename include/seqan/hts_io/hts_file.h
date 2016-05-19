@@ -35,6 +35,7 @@ class HtsFile
     hts_itr_t * hts_iter;   /** @brief An iterator that iterates through a certain region in the HTS file. */
     const char * file_mode; /** @brief Which file mode to use. E.g. "r" for reading and "wb" for writing binaries. */
     bool at_end = false;
+    bool read_all = true;
 
     /**
      * @brief Empty HTS file constructor
@@ -225,6 +226,15 @@ buildIndex(HtsFile & file, const char * indexFileName, int min_shift = 0)
 inline bool
 setRegion(HtsFile & file, const char * region)
 {
+    if (strncmp(region, ".", 1) == 0)
+    {
+      file.read_all = true;
+    }
+    else
+    {
+      file.read_all = false;
+    }
+
     if (file.hts_iter != nullptr)
         sam_itr_destroy(file.hts_iter);
 
@@ -235,6 +245,7 @@ setRegion(HtsFile & file, const char * region)
 inline bool
 setRegion(HtsFile & file, const char * chromosome, int start, int end)
 {
+    file.read_all = false;
     if (file.hts_iter != nullptr)
         sam_itr_destroy(file.hts_iter);
 
@@ -247,6 +258,7 @@ setRegion(HtsFile & file, const char * chromosome, int start, int end)
 inline bool
 setRegion(HtsFile & file, int32_t tid, int32_t start, int32_t end)
 {
+    file.read_all = false;
     if (file.hts_iter != nullptr)
         sam_itr_destroy(file.hts_iter);
 
@@ -337,6 +349,11 @@ readRecord(BamAlignmentRecord & record, HtsFile & file)
 inline bool
 readRegion(HtsSequenceRecord & record, HtsFile & file)
 {
+    if (file.read_all)
+    {
+        return readRecord(record, file);
+    }
+
     if (sam_itr_next(file.fp, file.hts_iter, file.hts_record) >= 0)
     {
         record.parse(file.hts_record);
@@ -352,6 +369,11 @@ readRegion(HtsSequenceRecord & record, HtsFile & file)
 inline bool
 readRegion(BamAlignmentRecord & record, HtsFile & file)
 {
+    if (file.read_all)
+    {
+        return readRecord(record, file);
+    }
+
     if (sam_itr_next(file.fp, file.hts_iter, file.hts_record) >= 0)
     {
         parse(record, file.hts_record);
