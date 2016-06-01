@@ -41,7 +41,10 @@ class HtsFile
      * @brief Empty HTS file constructor
      */
     HtsFile(const char * mode = "r")
-      : filename(""), fp(nullptr), hdr(nullptr), hts_record(nullptr), hts_index(nullptr), hts_iter(nullptr), file_mode(mode), at_end(false) {}
+      : filename(""), fp(nullptr), hdr(nullptr), hts_record(nullptr), hts_index(nullptr), hts_iter(nullptr), file_mode(mode), at_end(false)
+    {
+        // Don't call open() yet, file name is not known
+    }
 
     /**
      * @brief Constructs a new HtsFile object.
@@ -68,19 +71,24 @@ class HtsFile
     inline bool
     open()
     {
-        static const char * read_mode = "r";
+        const char * read_mode = "r";
         fp = hts_open(filename, file_mode);
 
         if (fp == nullptr)
         {
-            // return false;
             SEQAN_FAIL("Could not open file with filename %s", filename);
+            // return false;
         }
 
-        if (file_mode == read_mode)
+        if (strcmp(file_mode, read_mode) == 0)
         {
             hdr = sam_hdr_read(fp);
         }
+
+        // if (hdr == nullptr)
+        // {
+        //   return false;
+        // }
 
         hts_record = bam_init1();
         return true;
@@ -238,6 +246,12 @@ setRegion(HtsFile & file, const char * region)
     if (file.hts_iter != nullptr)
         sam_itr_destroy(file.hts_iter);
 
+    if (file.hdr == nullptr)
+    {
+      if (!file.open())
+        return false;
+    }
+
     file.hts_iter = sam_itr_querys(file.hts_index, file.hdr, region);
     return file.hts_iter;
 }
@@ -251,6 +265,13 @@ setRegion(HtsFile & file, const char * chromosome, int start, int end)
 
     char region[50];
     sprintf(region, "%s:%d-%d", chromosome, start, end);
+
+    if (file.hdr == nullptr)
+    {
+      if (!file.open())
+        return false;
+    }
+
     file.hts_iter = sam_itr_querys(file.hts_index, file.hdr, region);
     return file.hts_iter != nullptr;
 }
