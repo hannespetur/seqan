@@ -104,12 +104,11 @@ BCF/Tabix example
   seqan::open(index, "/path/to/my/file/example.vcf.gz");
   seqan::setRegion(index, "chrX:A-B"); // "chrX" and "chrX:A" also supported
   seqan::VcfRecord record;
-  
+
   while (seqan::readRegion(record, index))
   {
     // Do stuff with record
   }
-
 
 HTS file read and write example (SAM/BAM/CRAM is automatically detected)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -151,10 +150,3 @@ HTS file index example
   {
     // Do stuff with each record that overlaps the chrX:A-B region.
   }
-
-
-SeqAn
---------------
-
-For information about SeqAn check out `<https://github.com/seqan/seqan>`_
-

@@ -64,7 +64,9 @@ class HtsFile
      */
     ~HtsFile()
     {
-        bam_hdr_destroy(hdr);
+        if (hdr)
+          bam_hdr_destroy(hdr);
+
         hts_close(fp);
     }
 
@@ -414,7 +416,7 @@ readRegion(BamAlignmentRecord & record, HtsFile & file)
  * @returns True on success, otherwise false.
  */
 inline bool
-writeHeader(HtsFileOut & file)
+writeHeader(HtsFile & file)
 {
     return !sam_hdr_write(file.fp, file.hdr);
 }
