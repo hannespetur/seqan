@@ -102,14 +102,20 @@ inline std::string
 toString(BamAlignmentRecord const & record, bam_hdr_t * hdr)
 {
   std::stringstream ss;
-  ss << record.qName << '\t' << record.flag << '\t' << hdr->target_name[record.rID] << '\t' << record.beginPos+1 << '\t' << record.mapQ << '\t';
+
+  std::string const chrom = record.rID == -1 ? "*" : hdr->target_name[record.rID];
+  ss << record.qName << '\t' << record.flag << '\t' << chrom << '\t' << record.beginPos+1 << '\t' << record.mapQ << '\t';
 
   for (auto print_it = begin(record.cigar); print_it != end(record.cigar); ++ print_it)
   {
     ss << print_it->count << print_it->operation;
   }
 
-  if (record.rNextId == record.rID)
+  if (record.rNextId == -1)
+  {
+    ss << "\t*\t";
+  }
+  else if (record.rNextId == record.rID)
   {
     ss << "\t=\t";
   }
