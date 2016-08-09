@@ -239,6 +239,7 @@ setRegion(HtsFile & file, const char * region)
     if (strncmp(region, ".", 1) == 0)
     {
       file.read_all = true;
+      return true;
     }
     else
     {
