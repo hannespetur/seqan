@@ -22,7 +22,7 @@ class Tabix
   const tbx_conf_t *idxconf;
   String<String<char> > chroms;
   unsigned rID = 0;
-  
+
 
   // Tabix(void) { }
 };
@@ -138,7 +138,7 @@ _insertDataToVcfRecord(VcfRecord & record, String<char> const & line, unsigned c
 /**
  * @brief Reads a VCF record to a single string.
  * @details [long description]
- * 
+ *
  * @param[in,out] line [description]
  * @param[in] index [description]
  */
@@ -191,10 +191,10 @@ readRawRecord(std::string & line, Tabix & index)
  * @brief Read a VCF record from a tabix file.
  * @details The tabix file needs to have previously been opened. If no record can be read false is returned,
  * this can happen either because we've reached the end of the specified region or end of the BCF file.
- * 
+ *
  * @param record A VCF record.
  * @param index Tabix index.
- * 
+ *
  * @return True means a new record was read, false is returned otherwise.
  */
 inline bool
@@ -210,8 +210,8 @@ readRecord(VcfRecord & record, Tabix & index)
 
 /**
  * @brief Changes the region of the index.
- * @details The 
- * 
+ * @details The
+ *
  * @param[in,out] index Tabix index.
  * @param[in] region The region to change to. It should be on the format chrX or chrX:Y-Z.
  */
@@ -224,8 +224,8 @@ setRegion(Tabix & index, const char * region)
 
 /**
  * @brief Reads a region of a VCF file.
- * @details Note: The records variable is not clear before adding VCF records, to allow extractions of multiple regions. 
- * 
+ * @details Note: The records variable is not clear before adding VCF records, to allow extractions of multiple regions.
+ *
  * @param[in,out] records A list of VCF records.
  * @param index [description]
  * @param region [description]
@@ -306,9 +306,11 @@ open(Tabix & index, char const * vcfFilename, const char * fileMode = "r")
 
   // set up the iterator, defaults to the beginning
   index.rID = 0;
-  index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[0]));
+
+  if (seqan::length(index.chroms) > 0)
+    index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[0]));
 }
 
-}  // namespace seqan 
+}  // namespace seqan
 
 #endif  // SEQAN_VCF_IO_TABIX_H_
