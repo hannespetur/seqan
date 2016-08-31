@@ -284,14 +284,10 @@ open(Tabix & index, char const * vcfFilename, const char * fileMode = "r")
   std::free(fnidx);
 
   if ((index.fp = hts_open(vcfFilename, fileMode)) == 0)
-  {
     SEQAN_FAIL("Fail to open the VCF file.");
-  }
 
   if ((index.tbx = tbx_index_load(vcfFilename)) == NULL)
-  {
     SEQAN_FAIL("Failed to load the VCF index file.");
-  }
 
   int nseq;
   const char** seq = tbx_seqnames(index.tbx, &nseq);
