@@ -287,7 +287,7 @@ parse(bam1_t * hts_record, bam_hdr_t * hdr, BamAlignmentRecord const & record)
   return true;
 }
 
-}
+} // namespace seqan
 
 
 #endif // INCLUDE_SEQAN_HTS_IO_BAM_ALIGNMENT_RECORD_H_
