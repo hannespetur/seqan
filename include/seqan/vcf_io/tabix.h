@@ -13,6 +13,9 @@
 
 namespace seqan {
 
+
+
+
 class Tabix
 {
  public:
@@ -22,13 +25,13 @@ class Tabix
   const tbx_conf_t *idxconf;
   String<String<char> > chroms;
   unsigned rID = 0;
-
+  StringSet<CharString> samples;
 
   // Tabix(void) { }
 };
 
 inline void
-clear(Tabix index)
+clear(Tabix & index)
 {
     // tbx_itr_destroy(index.hts_iter);
     // tbx_destroy(index.tbx);
@@ -37,7 +40,7 @@ clear(Tabix index)
 }
 
 inline void
-getHeader(String<char> & header, Tabix & index)
+getHeader(seqan::CharString& header_string, Tabix & index)
 {
   // clear(header);
   kstring_t str = {0,0,0};
@@ -50,8 +53,19 @@ getHeader(String<char> & header, Tabix & index)
     }
     else
     {
-      append(header, str.s);
-      append(header, "\n");
+      if (length(str.s) > 5 && strncmp(str.s, "#CHROM", 6) == 0)
+      {
+        seqan::CharString h_line(str.s);
+        seqan::strSplit(index.samples, h_line, seqan::EqualsChar<'\t'>());
+        size_t end = 8;
+        if (length(index.samples) > 8 && index.samples[8] == "FORMAT") end = 9;
+        erase(index.samples, 0, end);
+      }
+      else
+      {
+        append(header_string, str.s);
+        append(header_string, "\n");
+      }
     }
   }
 
@@ -132,6 +146,12 @@ _insertDataToVcfRecord(VcfRecord & record, String<char> const & line, unsigned c
     if (length(splitted_line) > 8)
     {
         record.format = splitted_line[8];
+    }
+
+    if (length(splitted_line) > 9)
+    {
+        erase(splitted_line, 0, 9);
+        record.genotypeInfos = std::move(splitted_line);
     }
 }
 

@@ -128,14 +128,14 @@ readHeader(VcfHeader & header,
                 ParseError("Invalid line with samples.");
 
             // Split line, get sample names.
-            StringSet<CharString> fields;
-            strSplit(fields, buffer, IsTab());
-            if (length(fields) < 9u)
-                ParseError("Not enough fields.");
+            //StringSet<CharString> fields;
+            //strSplit(fields, buffer, IsTab());
+            //if (length(fields) < 9u)
+                //ParseError("Not enough fields.");
 
             // Get sample names.
-            for (unsigned i = 9; i < length(fields); ++i)
-                appendName(sampleNamesCache(context), fields[i]);
+            //for (unsigned i = 9; i < length(fields); ++i)
+                //appendName(sampleNamesCache(context), fields[i]);
         }
     }
 }
