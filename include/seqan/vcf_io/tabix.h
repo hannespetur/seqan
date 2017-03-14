@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 #include <string>
-// #include <stdlib.h>
 #include <sys/stat.h>
 #include <iostream>
 #include <cstring>
@@ -11,9 +10,8 @@
 
 #include <seqan/vcf_io/vcf_record.h>
 
+
 namespace seqan {
-
-
 
 
 class Tabix
@@ -26,21 +24,29 @@ class Tabix
   String<String<char> > chroms;
   unsigned rID = 0;
   StringSet<CharString> samples;
-
-  // Tabix(void) { }
 };
+
 
 inline void
 clear(Tabix & index)
 {
     if (index.fp)
+    {
         hts_close(index.fp);
+        index.fp = NULL;
+    }
 
     if (index.hts_iter)
+    {
         tbx_itr_destroy(index.hts_iter);
+        index.hts_iter = NULL;
+    }
 
     if (index.tbx)
+    {
         tbx_destroy(index.tbx);
+        index.tbx = NULL;
+    }
 
     clear(index.chroms);
     index.rID = 0;
@@ -79,14 +85,15 @@ getHeader(seqan::CharString& header_string, Tabix & index)
 
   free(str.s);
 
-  // set back to start
+  //set back to start
   // index.rID = 0;
-
+  //
   // if (index.hts_iter)
   // {
   //   tbx_itr_destroy(index.hts_iter);
+  //   index.hts_iter = NULL;
   // }
-
+  //
   // index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[rID]));
 }
 
@@ -102,7 +109,10 @@ _nextRId(Tabix & index)
     ++index.rID;
 
     if (index.hts_iter)
+    {
         tbx_itr_destroy(index.hts_iter);
+        index.hts_iter = NULL;
+    }
 
     index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[index.rID]));
 }
@@ -249,7 +259,12 @@ readRecord(VcfRecord & record, Tabix & index)
 inline void
 setRegion(Tabix & index, const char * region)
 {
-    tbx_itr_destroy(index.hts_iter);
+    if (index.hts_iter)
+    {
+        tbx_itr_destroy(index.hts_iter);
+        index.hts_iter = NULL;
+    }
+
     index.hts_iter = tbx_itr_querys(index.tbx, region);
 }
 
