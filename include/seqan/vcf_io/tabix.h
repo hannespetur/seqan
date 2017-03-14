@@ -99,9 +99,12 @@ _onLastRId(Tabix & index)
 inline void
 _nextRId(Tabix & index)
 {
-  ++index.rID;
-  tbx_itr_destroy(index.hts_iter);
-  index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[index.rID]));
+    ++index.rID;
+
+    if (index.hts_iter)
+        tbx_itr_destroy(index.hts_iter);
+
+    index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[index.rID]));
 }
 
 inline bool
