@@ -33,10 +33,18 @@ class Tabix
 inline void
 clear(Tabix & index)
 {
-    // tbx_itr_destroy(index.hts_iter);
-    // tbx_destroy(index.tbx);
+    if (index.fp)
+        hts_close(index.fp);
+
+    if (index.hts_iter)
+        tbx_itr_destroy(index.hts_iter);
+
+    if (index.tbx)
+        tbx_destroy(index.tbx);
+
     clear(index.chroms);
     index.rID = 0;
+    clear(index.samples);
 }
 
 inline void
