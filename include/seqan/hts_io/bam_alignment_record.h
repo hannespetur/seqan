@@ -232,10 +232,10 @@ inline bool
 parse(BamAlignmentRecord & record, bam1_t * hts_record)
 {
   syncCores(record, hts_record);
-  resize(record.qName, record._l_qname-1, Exact());
-  auto it = hts_record->data;
-  arrayCopyForward(it, it + record._l_qname - 1, begin(record.qName, Standard()));
-  it += record._l_qname;
+
+  // Parse qName
+  record.qName = hts_record->data;
+  auto it = hts_record->data + record._l_qname;
 
   // Parse CIGAR
   resize(record.cigar, record._n_cigar, Exact());
