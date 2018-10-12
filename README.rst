@@ -1,8 +1,8 @@
 SeqAn - The Library for Sequence Analysis (now with HTS!)
 =========================================================
 
-This is a fork of SeqAn, with added extensibility of the htslib. List of new added features:
- * BCF file support.
+This is a fork of SeqAn 2.1 that uses htslib to read and write VCF/BCF and SAM/BAM/CRAM files. List of new added features:
+ * VCF/BCF file support.
     - Reading implemented.
     - Writing **not** implemented.
     - Indexes (Tabix)
@@ -22,15 +22,19 @@ This is a fork of SeqAn, with added extensibility of the htslib. List of new add
 If you need a feature which is not implemented you can ask me (Hannes Pétur, hannese@decode.is) to add it, or use the `htslib API <https://github.com/samtools/htslib>`_ directly.
 
 
-API differences
----------------
+Compilation differences between SeqAn and SeqAnHTS
+--------------------------------------------------
 
-There are only a few difference between the main SeqAn repository and this one. The differences will be specified here.
+Use the required SeqAn compilation flags and also include htslib by setting ``-I<path_to_htslib/include>`` and link to the htslib library.
+
+
+API differences between SeqAn and SeqAnHTS
+------------------------------------------
 
 The 'BamIndex' object
 ~~~~~~~~~~~~~~~~~~~~~
 
-BamIndex and BamFileIn (or -Out) have been merged into one object called BamFileIn (or -Out). A pointer to the index is simply an instance variable of BamFile. If no index has been loaded or created it is a null pointer. For example, this:
+BamIndex and BamFileIn (or BamFileOut) have been merged into one class called BamFileIn (or BamFileOut). A pointer to the index is simply an instance variable of BamFile. If no index has been loaded or created it is a null pointer. For example, this:
 
 .. code-block:: cpp
 
@@ -83,6 +87,7 @@ The 'context' function is not defined or any other function that uses it for two
 This can be changed to
 
 .. code-block:: cpp
+
   CharString chr = "chr19";
   int start = 3000;
   int end = 4000;
@@ -110,7 +115,7 @@ BCF/Tabix example
     // Do stuff with record
   }
 
-HTS file read and write example (SAM/BAM/CRAM is automatically detected)
+HTS file read and write example (SAM/BAM/CRAM format is automatically detected)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: cpp
@@ -144,7 +149,7 @@ HTS file index example
   }
 
   seqan::setRegion(hts_file, "chrX:A-B");
-  seqan::HtsSequenceRecord record; // Only parses qName and sequence, use seqan::HtsAlignmentRecord to parse all
+  seqan::HtsSequenceRecord record; // Only parses qName and sequence, use seqan::BamAlignmentRecord to parse all
 
   while (readRegion(record, hts_file))
   {

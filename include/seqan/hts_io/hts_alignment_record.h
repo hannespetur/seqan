@@ -53,42 +53,6 @@ class HtsSequenceRecord
     }
 };
 
-/*
-class HtsAlignmentRecord : public HtsSequenceRecord
-{
-  public:
-    // __uint32 _qID; What is this?
-    // uint16_t flag;
-    StringSet<String<char> > cigar; // TODO: Change to String<CigarElement>?
-    String<char> qual;
-    // String<char> tags;
-
-    void parse(bam1_t * hts_record)
-    {
-        HtsSequenceRecord::parse(hts_record);
-
-        // parse quality
-        uint8_t* qualptr = bam_get_qual(hts_record);
-        resize(qual, length(seq), Exact());
-
-        for (unsigned i = 0; i < length(seq); ++i, ++qualptr)
-        {
-            qual[i] = static_cast<char>(*qualptr + 33);
-        }
-
-        // parse cigar
-        uint32_t* cigarptr = bam_get_cigar(hts_record);
-
-        for (unsigned i = 0; i < (hts_record)->core.n_cigar; ++i, ++cigarptr)
-        {
-            static char const * CIGAR_MAPPING = "MIDNSHP=X*******";
-            char buffer [16];
-            sprintf (buffer, "%c%d ", static_cast<char>(CIGAR_MAPPING[(*cigarptr >> 28) & 0xF]), (*cigarptr >> 4) & 0xFFFFF);
-            appendValue(cigar, buffer);
-        }
-    }
-};
-*/
 } // namespace seqan
 
 #endif // SEQAN_HTS_IO_HTS_ALIGNMENT_RECORD_H_
