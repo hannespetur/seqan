@@ -51,12 +51,13 @@ class HtsFile
      *
      * @param f The filename of the file.
      * @param mode The file mode to use when opening the file.
+     * @param reference Reference FASTA file. Used for reading CRAM files.
      * @return A new HtsFile object.
      */
-    HtsFile(const char * f, const char * mode)
+    HtsFile(const char * f, const char * mode, const char * reference = "")
       : filename(f), fp(nullptr), hdr(nullptr), hts_record(nullptr), hts_index(nullptr), hts_iter(nullptr), file_mode(mode), at_end(false)
     {
-        open();
+        open(reference);
     }
 
     /**
@@ -71,7 +72,7 @@ class HtsFile
     }
 
     inline bool
-    open()
+    open(const char * reference = "")
     {
         const char * read_mode = "r";
         fp = hts_open(filename, file_mode);
@@ -80,6 +81,17 @@ class HtsFile
         {
             SEQAN_FAIL("Could not open file with filename %s", filename);
             // return false;
+        }
+
+        // Use a specific reference FASTA file (needed for reading CRAM with no reference in @SQ tags in header)
+        if (reference != nullptr && reference[0] != '\0')
+        {
+            int ret = hts_set_fai_filename(fp, reference);
+
+            if (ret < 0)
+            {
+                SEQAN_FAIL("Could not open reference FASTA file with filename %s", reference);
+            }
         }
 
         if (strcmp(file_mode, read_mode) == 0)
