@@ -16,7 +16,6 @@ This is a fork of SeqAn 2.1 that uses htslib to read and write VCF/BCF and SAM/B
         + Reading implemented.
         + Building implemented.
     - Parsing to SeqAn alignment records.
-        + Parsing of qName, seq, qual and cigar implemented. The rest is **not**.
 
 
 If you need a feature which is not implemented you can ask me (Hannes Pétur, hannese@decode.is) to add it, or use the `htslib API <https://github.com/samtools/htslib>`_ directly.
@@ -91,7 +90,6 @@ This can be changed to
   CharString chr = "chr19";
   int start = 3000;
   int end = 4000;
-  int rID = 0;
   if (!setRegion(bamFileIn, toCString(chr), start, end))
   {
     std::cerr << "ERROR: Could not jump to " << chr << ":" << start << "-" << end << "\n";
