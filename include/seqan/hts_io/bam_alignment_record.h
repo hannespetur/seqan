@@ -98,6 +98,7 @@ printTag(TTagType & read_int, CharString const & tags, unsigned & i, std::string
   i += sizeof(TTagType);
 }
 
+
 inline std::string
 toString(BamAlignmentRecord const & record, bam_hdr_t * hdr)
 {
@@ -106,23 +107,22 @@ toString(BamAlignmentRecord const & record, bam_hdr_t * hdr)
   std::string const chrom = record.rID == -1 ? "*" : hdr->target_name[record.rID];
   ss << record.qName << '\t' << record.flag << '\t' << chrom << '\t' << record.beginPos+1 << '\t' << record.mapQ << '\t';
 
-  for (auto print_it = begin(record.cigar); print_it != end(record.cigar); ++ print_it)
+  if (length(record.cigar) > 0)
   {
-    ss << print_it->count << print_it->operation;
-  }
-
-  if (record.rNextId == -1)
-  {
-    ss << "\t*\t";
-  }
-  else if (record.rNextId == record.rID)
-  {
-    ss << "\t=\t";
+    for (auto print_it = begin(record.cigar); print_it != end(record.cigar); ++ print_it)
+      ss << print_it->count << print_it->operation;
   }
   else
   {
-    ss << '\t' << hdr->target_name[record.rNextId] << '\t';
+    ss << "*";
   }
+
+  if (record.rNextId == -1)
+    ss << "\t*\t";
+  else if (record.rNextId == record.rID)
+    ss << "\t=\t";
+  else
+    ss << '\t' << hdr->target_name[record.rNextId] << '\t';
 
   ss << record.pNext+1 << '\t' << record.tLen << '\t' << record.seq << '\t' << record.qual;
 
@@ -276,14 +276,24 @@ parse(BamAlignmentRecord & record, bam1_t * hts_record)
   return true;
 }
 
+
 inline bool
 parse(bam1_t * hts_record, bam_hdr_t * hdr, BamAlignmentRecord const & record)
 {
   kstring_t * s = static_cast<kstring_t*>(calloc(1, sizeof(kstring_t)));
-  ksprintf(s, "%s", toString(record, hdr).data());
-  sam_parse1(s, hdr, hts_record);
+  std::string str = toString(record, hdr);
+  ksprintf(s, "%s", str.data());
+  int ret = sam_parse1(s, hdr, hts_record);
+
   free(s->s);
   free(s);
+
+  if (ret != 0)
+  {
+    std::cerr << "[seqan::hts_io.bam_alignment_record] ERROR parsing record.\n";
+    return false;
+  }
+
   return true;
 }
 

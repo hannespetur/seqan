@@ -431,19 +431,7 @@ readRegion(BamAlignmentRecord & record, HtsFile & file)
 inline bool
 writeHeader(HtsFile & file)
 {
-    return !sam_hdr_write(file.fp, file.hdr);
-}
-
-/**
- * @brief Writes a HTS record to disk. Returns
- *
- * @param file HTS file to get the record from.
- * @returns True on success, otherwise false.
- */
-inline bool
-writeRecord(HtsFile & file)
-{
-    return !sam_write1(file.fp, file.hdr, file.hts_record);
+    return sam_hdr_write(file.fp, file.hdr) >= 0;
 }
 
 /**
@@ -451,12 +439,18 @@ writeRecord(HtsFile & file)
  *
  * @param file The file to write to.
  * @param record The record to write.
+ *
+ * @returns True on success, otherwise false.
  */
 inline bool
 writeRecord(HtsFile & file, BamAlignmentRecord const & record)
 {
-    parse(file.hts_record, file.hdr, record);
-    return writeRecord(file);
+    int ret = parse(file.hts_record, file.hdr, record);
+
+    if (ret < 0)
+      return false;
+
+    return sam_write1(file.fp, file.hdr, file.hts_record) >= 0;
 }
 
 
