@@ -68,6 +68,7 @@ class HtsFile
         if (hdr)
           bam_hdr_destroy(hdr);
 
+        bam_destroy1(hts_record);
         hts_close(fp);
     }
 
