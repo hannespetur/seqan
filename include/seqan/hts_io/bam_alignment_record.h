@@ -147,7 +147,7 @@ toString(BamAlignmentRecord const & record, bam_hdr_t * hdr)
       case 'A':
       {
         /* A printable character */
-        ss << record.tags[i];
+        ss << "A:" << record.tags[i];
         ++i;
         break;
       }
