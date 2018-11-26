@@ -104,6 +104,17 @@ toString(BamAlignmentRecord const & record, bam_hdr_t * hdr)
 {
   std::stringstream ss;
 
+  if (!hdr)
+  {
+    std::cerr << "ERROR: No header. Did you forget to read header?" << std::endl;
+    std::exit(1);
+  }
+  else if (record.rID >= hdr->n_targets)
+  {
+    std::cerr << "ERROR: Invalid contig in BamAlignmentRecord with rID " << record.rID << std::endl;
+    std::exit(1);
+  }
+
   std::string const chrom = record.rID == -1 ? "*" : hdr->target_name[record.rID];
   ss << record.qName << '\t' << record.flag << '\t' << chrom << '\t' << record.beginPos+1 << '\t' << record.mapQ << '\t';
 
@@ -145,8 +156,8 @@ toString(BamAlignmentRecord const & record, bam_hdr_t * hdr)
       {
         ss << "Z:";
 
-        /* A string! Let's loop it until NULL */
-        while (record.tags[i] != '\0')
+        /* A string! Let's loop it until qNULL */
+        while (record.tags[i] != '\0' && record.tags[i] != '\t' && record.tags[i] != '\n')
         {
           ss << record.tags[i];
           ++i;
@@ -222,8 +233,6 @@ toString(BamAlignmentRecord const & record, bam_hdr_t * hdr)
     }
   }
 
-  ss << std::endl;
-
   return ss.str();
 }
 
@@ -290,7 +299,8 @@ parse(bam1_t * hts_record, bam_hdr_t * hdr, BamAlignmentRecord const & record)
 
   if (ret != 0)
   {
-    std::cerr << "[seqan::hts_io.bam_alignment_record] ERROR parsing record.\n";
+    std::cerr << "[seqan::hts_io.bam_alignment_record] ERROR parsing record:\n";
+    std::cerr << str << std::endl;
     return false;
   }
 

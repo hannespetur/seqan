@@ -66,10 +66,13 @@ class HtsFile
     ~HtsFile()
     {
         if (hdr)
-          bam_hdr_destroy(hdr);
+            bam_hdr_destroy(hdr);
 
-        bam_destroy1(hts_record);
-        hts_close(fp);
+        if (hts_record)
+            bam_destroy1(hts_record);
+
+        if (fp)
+            hts_close(fp);
     }
 
     inline bool
