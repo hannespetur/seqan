@@ -198,6 +198,9 @@ copyRecord(HtsFile & target, HtsFile const & source)
 inline bool
 loadIndex(HtsFile & file)
 {
+    if (file.hts_index)
+        hts_idx_destroy(file.hts_index);
+
     file.hts_index = sam_index_load(file.fp, file.filename);
     return file.hts_index != nullptr;
 }
@@ -211,6 +214,9 @@ loadIndex(HtsFile & file)
 inline bool
 loadIndex(HtsFile & file, const char * indexFileName)
 {
+    if (file.hts_index)
+        hts_idx_destroy(file.hts_index);
+
     file.hts_index = sam_index_load2(file.fp, file.filename, indexFileName);
     return file.hts_index != nullptr;
 }
