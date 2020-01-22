@@ -87,7 +87,7 @@ public:
 
 
   inline bool
-  open(const char * reference = "")
+  open(const char * reference = nullptr)
   {
     const char * read_mode = "r";
     fp = hts_open(filename, file_mode);
@@ -95,7 +95,7 @@ public:
     if (fp == nullptr)
     {
       SEQAN_FAIL("Could not open file with filename %s", filename);
-      // return false;
+      return false;
     }
 
     // Use a specific reference FASTA file (needed for reading CRAM with no reference in @SQ tags in header)
@@ -106,18 +106,21 @@ public:
       if (ret < 0)
       {
         SEQAN_FAIL("Could not open reference FASTA file with filename %s", reference);
+        return false;
       }
     }
 
-    if (strcmp(file_mode, read_mode) == 0)
+    //hts_log_error(seqan::toCString(filename));
+    if (strncmp(file_mode, read_mode, 1) == 0)
     {
       hdr = sam_hdr_read(fp);
-    }
 
-    // if (hdr == nullptr)
-    // {
-    //   return false;
-    // }
+      if (hdr == nullptr || hdr == NULL)
+      {
+        SEQAN_FAIL("Could not open header in file with filename %s", filename);
+        return false;
+      }
+    }
 
     hts_record = bam_init1();
     return true;
@@ -159,10 +162,10 @@ typedef HtsFileOut BamFileOut;
  * @param f The filename to open from.
  */
 inline bool
-open(HtsFile & target, const char * f)
+open(HtsFile & target, const char * f, const char * reference = nullptr)
 {
   target.filename = f;
-  return target.open();
+  return target.open(reference);
 }
 
 
@@ -306,6 +309,7 @@ inline bool
 setRegion(HtsFile & file, const char * chromosome, int start, int end)
 {
   file.read_all = false;
+
   if (file.hts_iter != nullptr)
     sam_itr_destroy(file.hts_iter);
 
@@ -448,14 +452,22 @@ readRegion(BamAlignmentRecord & record, HtsFile & file)
     return readRecord(record, file);
   }
 
-  if (sam_itr_next(file.fp, file.hts_iter, file.hts_record) >= 0)
+  int ret = sam_itr_next(file.fp, file.hts_iter, file.hts_record);
+
+  if (ret >= 0)
   {
     parse(record, file.hts_record);
     return true;
   }
+  else if (ret == -1)
+  {
+    // We've reached the end of the file
+    return false;
+  }
   else
   {
-    // We've reached the end of the file, or an error occured.
+    // An error occured in htslib
+    SEQAN_FAIL("Encountered a htslib error when reading file %s", file.filename);
     return false;
   }
 }
