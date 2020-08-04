@@ -14,182 +14,182 @@
 namespace seqan {
 
 
-class Tabix
-{
-public:
-  htsFile * fp = nullptr;
-  tbx_t * tbx = nullptr;
-  hts_itr_t * hts_iter = nullptr;
-  const tbx_conf_t * idxconf;
-  String < String < char >> chroms;
-  unsigned rID = 0;
-  StringSet < CharString > samples;
-
-  ~Tabix();
-};
-
-
-inline void
-clear(Tabix & index)
-{
-  if (index.fp)
+  class Tabix
   {
-    hts_close(index.fp);
-    index.fp = nullptr;
-  }
+  public:
+    htsFile * fp = nullptr;
+    tbx_t * tbx = nullptr;
+    hts_itr_t * hts_iter = nullptr;
+    const tbx_conf_t * idxconf;
+    String < String < char >> chroms;
+    unsigned rID = 0;
+    StringSet < CharString > samples;
 
-  if (index.hts_iter)
+    ~Tabix();
+  };
+
+
+  inline void
+  clear(Tabix & index)
   {
-    tbx_itr_destroy(index.hts_iter);
-    index.hts_iter = nullptr;
-  }
-
-  if (index.tbx)
-  {
-    tbx_destroy(index.tbx);
-    index.tbx = nullptr;
-  }
-
-  clear(index.chroms);
-  index.rID = 0;
-  clear(index.samples);
-}
-
-
-inline Tabix::~Tabix()
-{
-  clear(*this);
-}
-
-
-inline void
-getHeader(seqan::CharString & header_string, Tabix & index)
-{
-  // clear(header);
-  kstring_t str = {0, 0, 0};
-
-  while (hts_getline(index.fp, KS_SEP_LINE, &str) >= 0)
-  {
-    if (!str.l || str.s[0] != index.tbx->conf.meta_char)
+    if (index.fp)
     {
-      break;
+      hts_close(index.fp);
+      index.fp = nullptr;
     }
-    else
+
+    if (index.hts_iter)
     {
-      if (length(str.s) > 5 && strncmp(str.s, "#CHROM", 6) == 0)
+      tbx_itr_destroy(index.hts_iter);
+      index.hts_iter = nullptr;
+    }
+
+    if (index.tbx)
+    {
+      tbx_destroy(index.tbx);
+      index.tbx = nullptr;
+    }
+
+    clear(index.chroms);
+    index.rID = 0;
+    clear(index.samples);
+  }
+
+
+  inline Tabix::~Tabix()
+  {
+    clear(*this);
+  }
+
+
+  inline void
+  getHeader(seqan::CharString & header_string, Tabix & index)
+  {
+    // clear(header);
+    kstring_t str = {0, 0, 0};
+
+    while (hts_getline(index.fp, KS_SEP_LINE, &str) >= 0)
+    {
+      if (!str.l || str.s[0] != index.tbx->conf.meta_char)
       {
-        seqan::CharString h_line(str.s);
-        seqan::strSplit(index.samples, h_line, seqan::EqualsChar < '\t' > ());
-        size_t end = 8;
-        if (length(index.samples) > 8 && index.samples[8] == "FORMAT")
-          end = 9;
-        erase(index.samples, 0, end);
+        break;
       }
       else
       {
-        append(header_string, str.s);
-        append(header_string, "\n");
+        if (length(str.s) > 5 && strncmp(str.s, "#CHROM", 6) == 0)
+        {
+          seqan::CharString h_line(str.s);
+          seqan::strSplit(index.samples, h_line, seqan::EqualsChar < '\t' > ());
+          size_t end = 8;
+          if (length(index.samples) > 8 && index.samples[8] == "FORMAT")
+            end = 9;
+          erase(index.samples, 0, end);
+        }
+        else
+        {
+          append(header_string, str.s);
+          append(header_string, "\n");
+        }
       }
     }
-  }
 
-  free(str.s);
-
-  //set back to start
-  // index.rID = 0;
-  //
-  // if (index.hts_iter)
-  // {
-  //   tbx_itr_destroy(index.hts_iter);
-  //   index.hts_iter = NULL;
-  // }
-  //
-  // index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[rID]));
-}
-
-
-inline bool
-_onLastRId(Tabix & index)
-{
-  return index.rID == length(index.chroms) - 1;
-}
-
-
-inline void
-_nextRId(Tabix & index)
-{
-  ++index.rID;
-
-  if (index.hts_iter)
-  {
-    tbx_itr_destroy(index.hts_iter);
-    index.hts_iter = NULL;
-  }
-
-  index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[index.rID]));
-}
-
-
-inline bool
-_extractLineOfThisRId(String < char > & line, Tabix & index)
-{
-  kstring_t str = {0, 0, 0};
-
-  if (index.hts_iter && tbx_itr_next(index.fp, index.tbx, index.hts_iter, &str) >= 0)
-  {
-    line = str.s;
     free(str.s);
-    return true;
+
+    //set back to start
+    // index.rID = 0;
+    //
+    // if (index.hts_iter)
+    // {
+    //   tbx_itr_destroy(index.hts_iter);
+    //   index.hts_iter = NULL;
+    // }
+    //
+    // index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[rID]));
   }
 
-  free(str.s);
-  return false;
-}
 
-
-inline bool
-_extractLineOfThisRId(std::string & line, Tabix & index)
-{
-  kstring_t str = {0, 0, 0};
-
-  if (index.hts_iter && tbx_itr_next(index.fp, index.tbx, index.hts_iter, &str) >= 0)
+  inline bool
+  _onLastRId(Tabix & index)
   {
-    line = str.s;
+    return index.rID == length(index.chroms) - 1;
+  }
+
+
+  inline void
+  _nextRId(Tabix & index)
+  {
+    ++index.rID;
+
+    if (index.hts_iter)
+    {
+      tbx_itr_destroy(index.hts_iter);
+      index.hts_iter = NULL;
+    }
+
+    index.hts_iter = tbx_itr_querys(index.tbx, toCString(index.chroms[index.rID]));
+  }
+
+
+  inline bool
+  _extractLineOfThisRId(String < char > & line, Tabix & index)
+  {
+    kstring_t str = {0, 0, 0};
+
+    if (index.hts_iter && tbx_itr_next(index.fp, index.tbx, index.hts_iter, &str) >= 0)
+    {
+      line = str.s;
+      free(str.s);
+      return true;
+    }
+
     free(str.s);
-    return true;
+    return false;
   }
 
-  free(str.s);
-  return false;
-}
 
-
-inline void
-_insertDataToVcfRecord(VcfRecord & record, String < char > const & line, unsigned const & rID)
-{
-  seqan::StringSet < seqan::String < char >> splitted_line;
-  seqan::strSplit(splitted_line, line, seqan::EqualsChar < '\t' > ());
-  record.rID = rID;
-  lexicalCast(record.beginPos, splitted_line[1]);
-  --record.beginPos; // Change from 1-based to 0-based indexing
-  record.id = splitted_line[2];
-  record.ref = splitted_line[3];
-  record.alt = splitted_line[4];
-  lexicalCast(record.qual, splitted_line[5]);
-  record.filter = splitted_line[6];
-  record.info = splitted_line[7];
-
-  if (length(splitted_line) > 8)
+  inline bool
+  _extractLineOfThisRId(std::string & line, Tabix & index)
   {
-    record.format = splitted_line[8];
+    kstring_t str = {0, 0, 0};
+
+    if (index.hts_iter && tbx_itr_next(index.fp, index.tbx, index.hts_iter, &str) >= 0)
+    {
+      line = str.s;
+      free(str.s);
+      return true;
+    }
+
+    free(str.s);
+    return false;
   }
 
-  if (length(splitted_line) > 9)
+
+  inline void
+  _insertDataToVcfRecord(VcfRecord & record, String < char > const & line, unsigned const & rID)
   {
-    erase(splitted_line, 0, 9);
-    record.genotypeInfos = std::move(splitted_line);
+    seqan::StringSet < seqan::String < char >> splitted_line;
+    seqan::strSplit(splitted_line, line, seqan::EqualsChar < '\t' > ());
+    record.rID = rID;
+    lexicalCast(record.beginPos, splitted_line[1]);
+    --record.beginPos; // Change from 1-based to 0-based indexing
+    record.id = splitted_line[2];
+    record.ref = splitted_line[3];
+    record.alt = splitted_line[4];
+    lexicalCast(record.qual, splitted_line[5]);
+    record.filter = splitted_line[6];
+    record.info = splitted_line[7];
+
+    if (length(splitted_line) > 8)
+    {
+      record.format = splitted_line[8];
+    }
+
+    if (length(splitted_line) > 9)
+    {
+      erase(splitted_line, 0, 9);
+      record.genotypeInfos = std::move(splitted_line);
+    }
   }
-}
 
 
 /**
@@ -324,12 +324,12 @@ _insertDataToVcfRecord(VcfRecord & record, String < char > const & line, unsigne
 
 
   inline void
-  open(Tabix & index, char const * vcfFilename, const char * fileMode = "r")
+  open(Tabix & index, char const * vcfFilename, const char * fileMode = "r", const char * ext = ".tbi")
   {
     clear(index);
     struct stat stat_tbi, stat_vcf;
     char * fnidx = (char *) calloc(strlen(vcfFilename) + 5, 1);
-    strcat(strcpy(fnidx, vcfFilename), ".tbi");
+    strcat(strcpy(fnidx, vcfFilename), ext);
 
     if (bgzf_is_bgzf(vcfFilename) != 1)
     {
@@ -343,7 +343,7 @@ _insertDataToVcfRecord(VcfRecord & record, String < char > const & line, unsigne
 
     if (stat_vcf.st_mtime > stat_tbi.st_mtime)
     {
-      SEQAN_FAIL("The index file is older than the bcf file. Please reindex the bcf file.");
+      SEQAN_FAIL("The index file is older than the vcf file. Please reindex the vcf file.");
     }
 
     std::free(fnidx);
