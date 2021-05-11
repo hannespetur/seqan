@@ -588,7 +588,7 @@ capacity(std::array<TChar, N> const & me)
 // VC2015 implements some C++17 functions which would collide for 
 // applications that do using namespace std
 // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4280.pdf
-#if _MSC_VER < 1900
+#if !(defined(STDLIB_VS) || __cplusplus > 201402L)
 template <typename TContainer>
 inline SEQAN_FUNC_ENABLE_IF(Is<StlContainerConcept<TContainer> >, bool)
 empty(TContainer const & me)
@@ -596,14 +596,12 @@ empty(TContainer const & me)
     return me.empty();
 }
 
-#ifdef SEQAN_CXX11_COMPLETE
 template <typename TChar, std::size_t N>
 constexpr bool
 empty(std::array<TChar, N> const & me)
 {
     return me.empty();
 }
-#endif
 #endif
 
 // ----------------------------------------------------------------------------
