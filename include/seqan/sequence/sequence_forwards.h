@@ -157,8 +157,10 @@ template <typename TContainer, typename TPos> inline SEQAN_FUNC_ENABLE_IF(And<Is
 #ifdef SEQAN_CXX11_STANDARD
 template <typename TContainer, typename TPos> inline SEQAN_FUNC_ENABLE_IF(And<Is<StlContainerConcept<TContainer> >, Not<HasSubscriptOperator<TContainer> > >, typename Value<TContainer>::Type) value(TContainer && me, TPos const pos);
 #endif
+#if !(defined(STDLIB_VS) || __cplusplus > 201402L)
 template <typename TContainer> inline SEQAN_FUNC_ENABLE_IF(Is<StlContainerConcept<TContainer> >, bool) empty(TContainer const & me);
 template <typename T> inline SEQAN_FUNC_DISABLE_IF(Is<StlContainerConcept<typename RemoveReference<T>::Type> >, bool) empty(T const & me);
+#endif
 
 // --------------------------------------------------------------------------
 // Forwards For arrays and pointers.
